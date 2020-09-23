@@ -105,6 +105,8 @@ namespace ClipboardShared
                 {
                     if (File.Exists(imgPath))
                     {
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
                         File.Delete(imgPath);
                     }
                     using (FileStream fileStream = new FileStream(imgPath, FileMode.Create))
