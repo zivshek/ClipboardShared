@@ -101,18 +101,18 @@ namespace ClipboardShared
             }
             else if (data.GetDataPresent(DataFormats.Bitmap))
             {
-                MemoryStream pngStream = data.GetData("PNG") as MemoryStream;
-                if (pngStream != null)
+                using (MemoryStream pngStream = data.GetData("PNG") as MemoryStream)
                 {
-                    if (File.Exists(imgPath))
+                    if (pngStream != null)
                     {
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        File.Delete(imgPath);
-                    }
-                    using (FileStream fileStream = new FileStream(imgPath, FileMode.Create))
-                    {
-                        pngStream.WriteTo(fileStream);
+                        if (File.Exists(imgPath))
+                        {
+                            File.Delete(imgPath);
+                        }
+                        using (FileStream fileStream = new FileStream(imgPath, FileMode.Create))
+                        {
+                            pngStream.WriteTo(fileStream);
+                        }
                     }
                 }
             }
@@ -136,8 +136,10 @@ namespace ClipboardShared
                         break;
 
                     case c_ImageFile:
-                        Bitmap bm = new Bitmap(e.FullPath);
-                        CallClipboardFun(() => Clipboard.SetImage(bm));
+                        using (Bitmap bm = new Bitmap(e.FullPath))
+                        {
+                            CallClipboardFun(() => Clipboard.SetImage(bm));
+                        }
                         break;
                 }
                 watcherCounter = 0;
