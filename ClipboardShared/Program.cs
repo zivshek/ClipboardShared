@@ -75,11 +75,15 @@ namespace ClipboardShared
             directory = args[0];
             textPath = Path.Combine(directory, c_TextFile);
             imgPath = Path.Combine(directory, c_ImageFile);
+            if (!File.Exists(textPath))
+            {
+                File.Create(textPath).Close();
+            }
 
             ClipboardUpdate += ClipboardChangeHandler;
 
             watcher.Path = directory;
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            watcher.NotifyFilter = NotifyFilters.LastWrite;
             watcher.Changed += FileChangeHandler;
             watcher.EnableRaisingEvents = true;
 
@@ -93,10 +97,6 @@ namespace ClipboardShared
             if (data.GetDataPresent(DataFormats.UnicodeText))
             {
                 var contents = data.GetData(DataFormats.UnicodeText) as string;
-                if (!File.Exists(textPath))
-                {
-                    File.Create(textPath);
-                }
                 File.WriteAllText(textPath, contents);
             }
             else if (data.GetDataPresent(DataFormats.Bitmap))
