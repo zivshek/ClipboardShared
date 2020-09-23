@@ -38,6 +38,7 @@ namespace ClipboardShared
         private static string imgPath;
 
         private static FileSystemWatcher watcher = new FileSystemWatcher();
+        private static int watcherCounter = 0;
 
         private class NotificationForm : Form
         {
@@ -78,7 +79,7 @@ namespace ClipboardShared
             ClipboardUpdate += ClipboardChangeHandler;
 
             watcher.Path = directory;
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
             watcher.Changed += FileChangeHandler;
             watcher.EnableRaisingEvents = true;
 
@@ -120,20 +121,26 @@ namespace ClipboardShared
 
         private static void FileChangeHandler(Object src, FileSystemEventArgs e)
         {
-            switch (e.Name.ToLower())
+            // This event gets fired twice, on start modifying and on finish modifying
+            watcherCounter++;
+            if (watcherCounter == 2)
             {
-                case c_TextFile:
-                    string text = File.ReadAllText(e.FullPath);
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        CallClipboardFun(() => Clipboard.SetText(text));
-                    }
-                    break;
+                switch (e.Name.ToLower())
+                {
+                    case c_TextFile:
+                        string text = File.ReadAllText(e.FullPath);
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            CallClipboardFun(() => Clipboard.SetText(text));
+                        }
+                        break;
 
-                case c_ImageFile:
-                    Bitmap bm = new Bitmap(e.FullPath);
-                    CallClipboardFun(() => Clipboard.SetImage(bm));
-                    break;
+                    case c_ImageFile:
+                        Bitmap bm = new Bitmap(e.FullPath);
+                        CallClipboardFun(() => Clipboard.SetImage(bm));
+                        break;
+                }
+                watcherCounter = 0;
             }
         }
 
