@@ -4,7 +4,6 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Linq;
 
 namespace ClipboardShared
 {
@@ -88,10 +87,10 @@ namespace ClipboardShared
 
         private static void ClipboardChangeHandler()
         {
+            watcher.EnableRaisingEvents = false; // Don't invoke file changed events for our own change
             var data = Clipboard.GetDataObject();
             if (data.GetDataPresent(DataFormats.UnicodeText))
             {
-                watcher.EnableRaisingEvents = false; // Don't invoke file changed events for our own change
                 var contents = data.GetData(DataFormats.UnicodeText) as string;
                 if (!File.Exists(textPath))
                 {
@@ -101,7 +100,6 @@ namespace ClipboardShared
             }
             else if (data.GetDataPresent(DataFormats.Bitmap))
             {
-                watcher.EnableRaisingEvents = false;
                 MemoryStream pngStream = data.GetData("PNG") as MemoryStream;
                 if (pngStream != null)
                 {
@@ -109,8 +107,10 @@ namespace ClipboardShared
                     {
                         File.Delete(imgPath);
                     }
-                    FileStream fileStream = new FileStream(imgPath, FileMode.Create);
-                    pngStream.WriteTo(fileStream);
+                    using (FileStream fileStream = new FileStream(imgPath, FileMode.Create))
+                    {
+                        pngStream.WriteTo(fileStream);
+                    }
                 }
             }
             watcher.EnableRaisingEvents = true;
