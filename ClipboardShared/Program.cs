@@ -100,8 +100,15 @@ namespace ClipboardShared
             if (data.GetDataPresent(DataFormats.UnicodeText))
             {
                 var contents = data.GetData(DataFormats.UnicodeText) as string;
-                File.WriteAllText(textPath, contents);
-                Console.WriteLine("[Out] text: " + contents);
+                try
+                {
+                    File.WriteAllText(textPath, contents);
+                    Console.WriteLine("[Out] text: " + contents);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
             else if (data.GetDataPresent(DataFormats.Bitmap))
             {
@@ -138,13 +145,20 @@ namespace ClipboardShared
                     watcherCounter++;
                     if (watcherCounter == 2)
                     {
-                        string text = File.ReadAllText(e.FullPath);
-                        if (!string.IsNullOrEmpty(text))
+                        try
                         {
-                            CallClipboardFun(
-                                "[In] text: " + text,
-                                () => Clipboard.SetText(text)
-                                );
+                            string text = File.ReadAllText(e.FullPath);
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                CallClipboardFun(
+                                    "[In] text: " + text,
+                                    () => Clipboard.SetText(text)
+                                    );
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine(exception);
                         }
                         watcherCounter = 0;
                     }
