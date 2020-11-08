@@ -89,6 +89,8 @@ namespace ClipboardShared
             watcher.Changed += FileChangeHandler;
             watcher.EnableRaisingEvents = true;
 
+            Application.ThreadException += new ThreadExceptionEventHandler(BaseExceptionHandler);
+
             Application.Run(new NotificationForm());
         }
 
@@ -189,6 +191,11 @@ namespace ClipboardShared
             Console.WriteLine(msg);
 
             ClipboardUpdate += ClipboardChangeHandler;
+        }
+
+        private static void BaseExceptionHandler(object sender, ThreadExceptionEventArgs args)
+        {
+            Console.WriteLine(args.Exception);
         }
     }
 }
