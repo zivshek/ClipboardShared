@@ -1,0 +1,14 @@
+{
+    "name": "clipshared",
+    "version": "1.0.0",
+    "description": "Share clipboard between devices",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "author": "zivshek",
+    "license": "MIT",
+    "dependencies": {
+        "electron": "^10.1.2"
+    }
+}
