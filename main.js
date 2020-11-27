@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const chokidar = require('chokidar');
 const Store = require('electron-store');
-const iconv = require("iconv-lite");
 
 const { app, BrowserWindow, clipboard, ipcRenderer } = electron;
 
@@ -28,7 +27,7 @@ function createWindow() {
     win.removeMenu();
 
     win.loadURL(url.format({
-        pathname: path.join(__dirname, 'index.html'),
+        pathname: path.join(__dirname, '/src/index.html'),
         protocol: 'file',
         slashes: true
     }));
@@ -38,9 +37,6 @@ app.on('ready', function () {
     createWindow();
     const files = [`${sharedDir}${c_TextFile}`, `${sharedDir}${c_ImageFile}`];
     createWatcher(files);
-    let raw = fs.readFileSync(files[0], 'utf8');
-    let content = iconv.decode(raw, c_Encoding);
-    console.log(content);
     startWatching();
 });
 
@@ -72,9 +68,7 @@ function startWatching() {
         switch (filename) {
             case c_TextFile:
                 try {
-                    let raw = fs.readFileSync(file);
-                    let content = iconv.decode(raw, c_Encoding);
-                    console.log(content);
+                    let content = fs.readFileSync(file, c_Encoding);
                     clipboard.writeText(content);
                 } catch (error) {
                     console.log(error);
